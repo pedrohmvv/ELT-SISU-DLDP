@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Starting",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        ".vscode/manager.sh",
+        "-a",
+        "${input:componentType}"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "type": "pickString",
+      "id": "componentType",
+      "description": "Choose an option:",
+      "options": [
+        "Run DAG",
+        "Deploy Docker Environment",
+        "Code Analysis",
+        "Config Git Repositories"
+      ],
+      "default": "Run DAG"
+    }
+  ]
+}

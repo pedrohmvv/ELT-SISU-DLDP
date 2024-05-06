@@ -1,0 +1,35 @@
+# Pipeline stages
+stages:
+  - Code Analysis
+
+image: python:3.9-slim
+
+services:
+  - docker:20.10.16-dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+
+cache:
+  paths:
+    - deps_cache
+    - venv/
+
+before_script:
+  - python --version
+  - python -m venv venv
+  - source venv/bin/activate
+  - pip install pylint flake8 autopep8 --cache-dir deps_cache
+
+linting:
+  stage: Code Analysis
+  only:
+    - develop
+  allow_failure: true
+  script:
+    - autopep8 -rai src 
+    - flake8 src --exit-zero
+    - pylint --fail-under=8 src
+  tags:
+    - padrao

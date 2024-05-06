@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "configurations": [
+    {
+      "name": "Airflow",
+      "preLaunchTask": "Starting",
+      "request": "launch",
+      "type": "f5anything",
+      "command": "echo Running tasks",
+      "terminalIndex": 0,
+      "showTerminal": false
+    }
+  ]
+}

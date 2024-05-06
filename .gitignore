@@ -1,0 +1,25 @@
+# Arquivos/diretórios ignorados no controle de versionamento Git
+.idea
+__pycache__/
+.DS_Store
+.pycharm_helpers
+*.tmp
+.pyvenv
+.pytest_cache
+.thunder/*/thunderActivity.db
+.venv
+venv
+*venv
+*.venv
+*.pyc
+.local.env
+logs
+*logs
+.env.local
+*.env.local
+*tests
+*.ipynb
+tests
+data
+backup
+.env.secrets
