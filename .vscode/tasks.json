@@ -5,11 +5,7 @@
       "label": "Starting",
       "type": "shell",
       "command": "bash",
-      "args": [
-        ".vscode/manager.sh",
-        "-a",
-        "${input:componentType}"
-      ]
+      "args": [".vscode/manager.sh", "-a", "${input:componentType}"]
     }
   ],
   "inputs": [
@@ -18,12 +14,14 @@
       "id": "componentType",
       "description": "Choose an option:",
       "options": [
-        "Run DAG",
-        "Deploy Docker Environment",
+        "Deploy/Update Docker Environment",
+        "Run DAG in Terminal",
+        "Update Docker Submodules",
         "Code Analysis",
-        "Config Git Repositories"
+        "Add Docker Submodule",
+        "Remove/Down Docker Environment"
       ],
-      "default": "Run DAG"
+      "default": "Deploy/Update Docker Environment"
     }
   ]
 }

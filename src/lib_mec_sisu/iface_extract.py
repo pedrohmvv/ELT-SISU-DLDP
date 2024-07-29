@@ -10,7 +10,7 @@ class Extract:
         """ Load instance variables """
 
         # module import in airflow context
-        from lib_provider_theme.iface_config import Config
+        from lib_mec_sisu.iface_config import Config
 
         self.config = Config()
         self.context = airflow_context
@@ -47,7 +47,7 @@ class Extract:
             raise OSError(error) from error
 
     def __read_file(self) -> None:
-        """ Read DBC/DBF file
+        """ Read file
         return dataframe
         """
         try:

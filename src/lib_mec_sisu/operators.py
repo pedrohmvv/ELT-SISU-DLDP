@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Import modules"""
-from lib_provider_theme.iface_extract import Extract
-from lib_provider_theme.iface_transform import Transform
+from lib_mec_sisu.iface_extract import Extract
+from lib_mec_sisu.iface_transform import Transform
 
 
 def download(**context) -> None:

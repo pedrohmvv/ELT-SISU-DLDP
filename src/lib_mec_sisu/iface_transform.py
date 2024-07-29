@@ -10,7 +10,7 @@ class Transform:
         """ Load instance variables """
 
         # module import in airflow context
-        from lib_provider_theme.iface_config import Config
+        from lib_mec_sisu.iface_config import Config
 
         self.config = Config()
         self.context = airflow_context
@@ -19,11 +19,11 @@ class Transform:
 
     def __repr__(self) -> str:
         """ Basic instance representation """
-        return f"Tranform and insert data into: {str(self.config.table)}"
+        return f"Transform and insert data into: {str(self.config.table)}"
 
     def __str__(self) -> str:
         """ Print representation """
-        return f"Tranform and insert data into: {str(self.config.table)}"
+        return f"Transform and insert data into: {str(self.config.table)}"
 
     def __check_files(self) -> list:
         """ Check files
@@ -33,7 +33,7 @@ class Transform:
         return []
 
     def __transform(self) -> None:
-        """ Transform Datasus information
+        """ Transform information
         returns DataFrame
         """
 
@@ -47,4 +47,4 @@ class Transform:
         if self.__check_files() is True:
             self.__transform()
 
-        return 'Successfuly processed'
+        return 'Successfully processed'

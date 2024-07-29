@@ -1,5 +1,5 @@
 #!/bin/bash
-eval export $(cat .env)
+eval export $(cat ./src/docker/.env)
 
 PARAMS=""
 # handle params
@@ -18,23 +18,21 @@ done
 # set positional arguments in their proper place
 eval set -- "$PARAMS"
 
-
-
 # Conditionals
-if [ "$PARAMS" == "Deploy Docker Environment" ]; then
-    docker-compose up -d
-    docker-compose ps
-    echo "Running Airflow UI on http://localhost:8080"
-
+if [ "$PARAMS" == "Deploy/Update Docker Environment" ]; then
+    docker compose -f ./src/docker/docker-compose.yaml up -d
+    echo "Running Airflow UI on http://localhost:8080 or https://airflow.lemaufpb.dev/"
 fi
 
-if [ "$PARAMS" == "Run DAG" ]; then
-    echo "Updating envinroment ..."
-    docker-compose up -d
+if [ "$PARAMS" == "Run DAG in Terminal" ]; then
     echo "Running data workflow ..."
-    docker exec -it airflow-worker-container airflow dags test $DAG_ID
+    docker compose -f ./src/docker/docker-compose.yaml up -d
+    docker exec -it airflow-worker-container airflow dags test mec-sisu
 fi
 
+if [ "$PARAMS" == "Update Docker Submodules" ]; then
+    git submodule update --init --remote --recursive --force
+fi
 
 if [ "$PARAMS" == "Code Analysis" ]; then
     echo "Code Analysis"
@@ -49,15 +47,14 @@ if [ "$PARAMS" == "Code Analysis" ]; then
     fi
 fi
 
-if [ "$PARAMS" == "Config Git Repositories" ]; then
-  for remote in \
-    "git@gitlab.com:lema_ufpb/projetos/airflow/skeleton.git" 
-  do
-    git remote set-url --delete --push origin $remote 2> /dev/null
-    git remote set-url --add --push origin $remote
-  done
-  git remote show origin
+if [ "$PARAMS" == "Remove/Down Docker Environment" ]; then
+    docker compose -f ./src/docker/docker-compose.yaml down
 fi
+
+if [ "$PARAMS" == "Add Docker Submodule" ]; then
+    git submodule add -b main git@gitlab.com:lema-ufpb-hub/docker.git  src/docker
+fi
+
 
 
 

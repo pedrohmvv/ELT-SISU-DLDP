@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Import modules"""
-from os.path import abspath, dirname
+from os.path import abspath, dirname, join
 from sys import path as sys_path
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -9,8 +9,10 @@ from airflow.models.param import Param
 from airflow.operators.python import PythonOperator
 
 
-# initialize this local module base dir
-sys_path.insert(0, abspath(dirname(__file__)))
+# initialize airflow base dir
+BASE_DIR = dirname(abspath(__file__))
+sys_path.append(BASE_DIR)
+
 
 
 class DAGModel():
@@ -19,8 +21,14 @@ class DAGModel():
     """
 
     def __init__(self) -> None:
-        """Create a general project id"""
-        self.project_id = "provider-theme"
+        """Handle version"""
+        try:
+            with open(join(BASE_DIR, '.gitops')) as f:
+                version = f.readline()
+            f.close()
+        except:
+            version = "dev"
+        self.version = version
 
     def load_docs(self, filename: str):
         """Load docs from markdown files"""
@@ -59,7 +67,7 @@ class DAGModel():
         with dag:
 
             # Import local modules
-            from lib_provider_theme.operators import download, transform
+            from lib_mec_sisu.operators import download, transform
 
             # Define tasks: ST
             task_1 = PythonOperator(

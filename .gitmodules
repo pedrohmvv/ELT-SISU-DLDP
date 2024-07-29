@@ -1,0 +1,4 @@
+[submodule "src/docker"]
+	path = src/docker
+	url = git@gitlab.com:lema-ufpb-hub/docker.git
+	branch = main

@@ -1,8 +1,8 @@
 # Módulo DAG para Airflow
 
-## 💡 ETL de dados - Skeleton
+## 💡 ETL de dados - MEC SISU
 
-Esse projeto é um modelo com estrutra de organização básica orietanda a objetos.
+Esse projeto é um modelo com estrutura de organização básica orientada a objetos.
 
 ---
 

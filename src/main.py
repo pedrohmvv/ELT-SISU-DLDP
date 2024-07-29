@@ -11,7 +11,7 @@ sys_path.append(AIRFLOW_BASE)
 
 # Build dag for local test
 globals()["dag-test"] = DAGModel().create_dag(
-    dag_id=DAGModel().project_id,
+    dag_id="mec-sisu",
     schedule=None,
     owner="test-env",
     tags=[],
