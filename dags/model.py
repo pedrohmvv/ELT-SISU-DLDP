@@ -14,7 +14,6 @@ BASE_DIR = dirname(abspath(__file__))
 sys_path.append(BASE_DIR)
 
 
-
 class DAGModel():
     """
     Create a DAG model
@@ -23,14 +22,14 @@ class DAGModel():
     def __init__(self) -> None:
         """Handle version"""
         try:
-            with open(join(BASE_DIR, '.gitops')) as f:
+            with open(join(BASE_DIR, '.release')) as f:
                 version = f.readline()
             f.close()
         except:
             version = "dev"
         self.version = version
 
-    def load_docs(self, filename: str):
+    def __load_docs(self, filename: str) -> str:
         """Load docs from markdown files"""
         return Path(dirname(__file__), filename).read_text(encoding="utf8")
 
@@ -83,11 +82,10 @@ class DAGModel():
                 provide_context=True
             )
 
-
             # Model workflow
             task_1 >> task_2
 
             # Load docs
-            dag.doc_md = self.load_docs("docs/dag.md")
+            dag.doc_md = self.__load_docs("docs/main.md")
 
         return dag

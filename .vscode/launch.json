@@ -2,13 +2,10 @@
   "version": "2.0.0",
   "configurations": [
     {
-      "name": "Airflow",
-      "preLaunchTask": "Starting",
+      "name": "Tasks",
       "request": "launch",
-      "type": "f5anything",
-      "command": "echo Running tasks",
-      "terminalIndex": 0,
-      "showTerminal": false
+      "type": "debugpy",
+      "program": "./.vscode/tasks.py"
     }
   ]
 }
