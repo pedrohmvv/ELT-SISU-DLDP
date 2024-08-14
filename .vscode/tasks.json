@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "PyEnv",
+      "type": "shell",
+      "command": "./docker/airflow/tasks.sh",
+      "presentation": {
+        "focus": true,
+        "clear": true,
+        "echo": false
+      }
+    }
+  ],
+  "inputs": []
+}

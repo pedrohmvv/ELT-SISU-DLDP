@@ -38,7 +38,7 @@ Ferramentas:
 
 ## 📦 Ambiente de teste
 
-No VSCode, basta instalar a extensão _F5 Anything_ e executar os testes no **Airflow por linha de comando**
+No VSCode, executar os testes no **Airflow por linha de comando**
 usando a tecla F5. No diretório `.vscode` foram configuradas tasks para pré-checagem do ambiente docker
 para execução local da pipeline de dados.
 
