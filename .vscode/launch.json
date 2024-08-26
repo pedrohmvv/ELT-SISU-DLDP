@@ -3,11 +3,10 @@
   "configurations": [
     {
       "name": "Tasks",
-       "preLaunchTask": "PyEnv",
       "request": "launch",
       "type": "debugpy",
       "program": "./.vscode/tasks.py",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",  
     }
   ]
-}
+}   
