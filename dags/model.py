@@ -60,6 +60,11 @@ class DAGModel():
                     default=params.get('region'),
                     type="string",
                     description="Region for filter download data (ex. PB, SP, RN...)"
+                ),
+                "start_year": Param(
+                    default=params.get('start_year'),
+                    type="int",
+                    description="Start year for filter download data (ex. 2015, 2016, 2017...)"
                 )
             }
         )
