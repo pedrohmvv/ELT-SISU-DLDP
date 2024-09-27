@@ -12,28 +12,6 @@ from airflow.utils.log.logging_mixin import LoggingMixin as task_logger
 @dataclasses.dataclass
 class Variables:
     """ Variables dataclass """
-    database: str
-    registry: str
-    data_dir: str
-    files_dir: str
-    data_url: str
-    table: dict
-    extension: str
-
-# -*- coding: UTF-8 -*-
-"""Import modules"""
-import dataclasses
-from os.path import join, dirname, abspath
-from yaml import load
-from yaml.loader import SafeLoader
-from airflow.models import Variable
-from airflow.providers.mongo.hooks.mongo import MongoHook
-from airflow.utils.log.logging_mixin import LoggingMixin as task_logger
-
-
-@dataclasses.dataclass
-class Variables:
-    """ Variables dataclass """
     domain: str
     data_url: str
     database: str
