@@ -16,5 +16,6 @@ globals()["dag-test"] = DAGModel().create_dag(
     owner="test-env",
     tags=["mec-sisu"],
     timeout=10,
-    region="BR"
+    region="BR",
+    start_year=2015
 )

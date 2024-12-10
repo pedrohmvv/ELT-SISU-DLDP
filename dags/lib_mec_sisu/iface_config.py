@@ -12,13 +12,15 @@ from airflow.utils.log.logging_mixin import LoggingMixin as task_logger
 @dataclasses.dataclass
 class Variables:
     """ Variables dataclass """
+    domain: str
+    data_url: str
     database: str
     registry: str
-    data_dir: str
     files_dir: str
-    data_url: str
+    data_dir: str
     table: dict
     extension: str
+    cota_map: dict
 
 
 class Config:
@@ -31,13 +33,15 @@ class Config:
         with open(join(dirname(abspath(__file__)), 'env.yaml'), encoding='utf-8') as file:
             data = load(file, Loader=SafeLoader)
         self.vars = Variables(
+            domain=data.get('domain'),
             data_url=data.get("data_url"),
             database=data.get("database"),
-            table=data.get("table"),
             registry=data.get("registry"),
             files_dir=data.get("files_dir"),
-            data_dir=Variable.get("data_dir"),
-            extension='.csv.gz'
+            data_dir=data.get("data_dir"),
+            table=data.get("table"),
+            extension=data.get('extension'),
+            cota_map=data.get('cota_map')
         )
 
         self.db_connection = MongoHook(mongo_conn_id="mongo_default").get_conn()
