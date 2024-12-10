@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from airflow.models import DAG
 from airflow.models.param import Param
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash_operator import BashOperator
 
 
 # initialize airflow base dir
@@ -47,29 +48,30 @@ class DAGModel():
             "on_success_callback": params.get('on_success_callback'),
             "on_failure_callback": params.get('on_failure_callback')
         }
-
+        
         dag = DAG(
-            dag_id=params.get('dag_id'),
-            description=params.get('description'),
+            dag_id=params.get("dag_id"),
+            description=params.get("description"),
             default_args=default_args,
-            schedule_interval=params.get('schedule'),
+            schedule_interval=params.get("schedule"),
             catchup=False,
-            tags=params.get('tags'),
+            tags=params.get("tags"),
             params={
+                "start_year": Param(
+                    default=params.get("start_year"),
+                    type="integer",
+                    description="Year for transform task",
+                ),
                 "region": Param(
                     default=params.get('region'),
                     type="string",
-                    description="Region for filter download data (ex. PB, SP, RN...)"
+                    description="Region for filter download data (ex. PB, SP, RN...)",
                 ),
-                "start_year": Param(
-                    default=params.get('start_year'),
-                    type="int",
-                    description="Start year for filter download data (ex. 2015, 2016, 2017...)"
-                )
-            }
+            },
         )
-        with dag:
 
+        with dag:
+            
             # Import local modules
             from lib_mec_sisu.operators import download, transform
 

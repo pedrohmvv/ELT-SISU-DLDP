@@ -27,6 +27,7 @@ class Config:
     """ Configuration interface """
 
     def __init__(self) -> None:
+        
         """ Load instance variables """
         # Load project env vars
         data = {}
