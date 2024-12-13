@@ -60,23 +60,35 @@ class Transform:
         return processed_files
 
     
-    def __read_file(self, year) -> DataFrame:
-        """ Read CSV file
-        return DataFrame
+    def __read_file(self) -> DataFrame:
         """
+        Read files due to the separation and encoding variation
+        over the years
+        -------------------------------------------------------
+        Args:
+            file (str): file path
+        Return:
+            data (DataFrame) 
+        """
+        encoding = 'utf-8'
+        separators = [',', ';', '|']
+        # Tries with utf-8 encoding
         try:
-            if year >= 2022 or year == 2017:
-                data = read_csv(self.__file, sep='|', encoding='latin')
-            if 2018 <= year <= 2021:
-                if 'regular' in self.__file.lower():
-                    data = read_csv(self.__file, sep=';')
-                else:
-                    data = read_csv(self.__file, sep='|', encoding='latin')
-            if year == 2016:
-                data = read_csv(self.__file, sep='|')
+            for sep in separators:
+                data = read_csv(self.__file, sep=sep, encoding=encoding, low_memory=False, nrows=3, on_bad_lines='warn')
+                if len(data.columns) > 1:
+                    sep_adjusted = sep
+                    break
+        except UnicodeDecodeError:
+            # If the encoding used dont't works, try using 'latin1' 
+            encoding = 'latin1'
+            for sep in separators:
+                data = read_csv(self.__file, sep=sep, encoding=encoding, low_memory=False, nrows=3, on_bad_lines='warn')
+                if len(data.columns) > 1:
+                    sep_adjusted = sep
+                    break
 
-        except Exception as error:
-            return error
+        data = read_csv(self.__file, sep=sep_adjusted, encoding=encoding, low_memory=False, on_bad_lines='warn')
 
         return data
 
@@ -91,19 +103,18 @@ class Transform:
             ]
 
         matricula_map = {
-        'PENDENTE':'P', 'NÃO COMPARECEU':'F', 'EFETIVADA':'E', 'CANCELADA':'C',
-        'DOCUMENTACAO REJEITADA':'R', 'NÃO CONVOCADO':'NC',
-        'SUBSTITUIDA - MATRICULA FORA DO PRAZO':'S', 'NÃO MATRICULADO':'NM'
+            'PENDENTE':'P', 'NÃO COMPARECEU':'F', 'EFETIVADA':'E', 'CANCELADA':'C',
+            'DOCUMENTACAO REJEITADA':'R', 'NÃO CONVOCADO':'NC',
+            'SUBSTITUIDA - MATRICULA FORA DO PRAZO':'S', 'NÃO MATRICULADO':'NM'
         }
 
         cote_remap = {
             'Indígena': 3,
             'Preto': 5,
-            'Preto,Pardos, Indígenas e Quilombolas': 6,
+            'Preto, Pardos, Indígenas e Quilombolas': 6,
             'Ampla': 7,
             'Ignorado': 9
         }
-
 
         rename = {}
 
@@ -128,9 +139,18 @@ class Transform:
 
         data = (
             data.rename(columns = lambda x: x.lower())
-            .rename(columns = rename).rename(
-            columns = lambda x: x.replace('co_','').replace('nu_','').replace('st_','').replace('ds_','').replace('no_','').replace('sg_','')                                    
-            ))
+                .rename(
+                    columns = rename
+                )
+                .rename(
+                    columns = lambda x: x.replace('co_','')
+                                         .replace('nu_','')
+                                         .replace('st_','')
+                                         .replace('ds_','')
+                                         .replace('no_','')
+                                         .replace('sg_','')                                    
+            )
+        )
 
         try:
             data['matricula']
@@ -172,10 +192,10 @@ class Transform:
         """
         try:
             self.__file = file
-            data = self.__read_file(year)
+            data = self.__read_file()
             data = self.__sisu(data, year)
-
             return data
+        
         except Exception as error:
             raise OSError(error) from error
 

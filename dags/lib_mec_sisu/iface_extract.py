@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Import modules"""
-from os import path, system, remove, makedirs
+from os import path, system, remove, makedirs, rename
 from datetime import datetime
 from glob import glob
 from re import sub
@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 from requests import get
 from pandas import DataFrame, to_numeric
 from pymongo.errors import DuplicateKeyError
-
 
 class Extract:
     """ Extract data interface """
@@ -38,7 +37,6 @@ class Extract:
         """ Check files
         return DataFrame
         """
-
         try:
 
             key = self.config.vars.table
@@ -73,10 +71,11 @@ class Extract:
 
                 start += 10
 
-            
-            data = DataFrame({
-                    'url':download_links,
-                    }).assign(
+            data = DataFrame(
+                        {
+                            'url':download_links,
+                        }
+                    ).assign(
                         file=lambda x: x.url.str.replace(".*/", "", regex=True),
                         year=lambda x: to_numeric(x.url.str.extract(r'(\d{4})').iloc[:, 0], errors='coerce'),
                         sisu=lambda x: x.url.str[-5:-4],
@@ -84,14 +83,22 @@ class Extract:
                         _id=lambda x: x.file.str.replace('(.CSV)|(.csv)|(.ZIP)|(.zip)','',regex=True).str.lower()   
                     )
             
-            data['session'] = data['file'].apply(lambda x: 'espera' if 'espera' in x.lower() else 'regular')
+            data['session'] = (
+                data['file'].str.contains('espera')
+                                .map(
+                                    {
+                                     True: 'espera', 
+                                     False: 'regular'
+                                    }
+                                )
+                            )   
 
             if len(data) == 0:
                 raise FileNotFoundError(f"Error on read {self.config.vars.data_url}")
             
             self.log.info("Handle data")
             start_year = self.context['params']['start_year']
-            data = data.query('year>=@start_year')
+            data = data.query('year==@start_year')
 
             self.log.info("Searching for existing files")
             if len(data_registry) > 0:
@@ -130,19 +137,28 @@ class Extract:
                     makedirs(destfile)
                     
                 os_cmd = (
-                        f"wget --limit-rate {limit}k "
-                        f"--no-check-certificate -c {url} -O {destfile}/{filename}"
-                        )
+                    f"wget --limit-rate {limit}k "
+                    f"--no-check-certificate -c {url} -O {destfile}/{filename}"
+                )
                 
                 self.log.info(f"Downloading {file}, on URL:{url}")
                 system(os_cmd)
 
                 if extension == '.zip':
                     self.log.info('Uncompress ZIP file')
-                    system(f"7z e {destfile}/{filename} -O{destfile} -aoa")
+                    system(f"7z e {destfile}/{filename.replace(' ','')} -O{destfile} -aoa")
+
+                    # Renomear arquivos extraídos para corrigir nomes mal formatados
+                    self.log.info("Sanitizing extracted file names...")
+                    for extracted_file in glob(f"{destfile}/*"):
+                        sanitized_name = self.sanitize_filename(path.basename(extracted_file))
+                        sanitized_path = path.join(destfile, sanitized_name)
+                        if extracted_file != sanitized_path:
+                            self.log.info(f"Renaming {extracted_file} to {sanitized_path}")
+                            rename(extracted_file, sanitized_path)
 
                 self.log.info("Compress to GZIP...")
-                file_list = glob(f'{destfile}/*.[cC][sS][vV]')
+                file_list = glob(f'{destfile}/*.[cC][sS][vV]') 
 
                 for file in file_list:
                     system(f'gzip -f {file}')
@@ -157,8 +173,6 @@ class Extract:
                             '_id': f'{self.config.vars.table}_{session}_{sisu}_{year}'
                         }
                     )
-                    self.log.info(f'Tabela: {self.config.vars.table}')
-                    self.log.info(f'Tabela: {self.config.registry}')
                 
                 except DuplicateKeyError:
                     self.log.info(
@@ -169,3 +183,15 @@ class Extract:
                 raise OSError(error) from error
             
         return 'Download files finished'
+
+    @staticmethod
+    def sanitize_filename(filename: str) -> str:
+        """Sanitize a filename by replacing or removing unwanted characters"""
+        sanitized = filename.encode('utf-8', 'ignore').decode('utf-8')
+        sanitized = (
+            sanitized.replace('¢', 'o')
+                     .replace('?', '_')
+                     .replace(' ', '_')
+                     .replace('ç', 'o')
+          )  # Substituições específicas
+        return sanitized

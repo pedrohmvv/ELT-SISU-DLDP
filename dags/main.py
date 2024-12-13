@@ -17,5 +17,5 @@ globals()["dag-test"] = DAGModel().create_dag(
     tags=["mec-sisu"],
     timeout=10,
     region="BR",
-    start_year=2015
+    start_year=2018
 )
