@@ -241,3 +241,18 @@ class Transform:
         
         return 'Successfuly processed'
 
+    def rename_columns(df):
+        # Columns we want to keep
+        target_columns = [
+            'ANO', 'CPF', 'SIGLA_IES', 'UF_IES', 'MATRICULA',
+            'NOTA_L', 'NOTA_CH', 'NOTA_CN', 'NOTA_M', 'NOTA_R'
+        ]
+        # Sufixes to remove
+        sufixes = ['ST_', 'SG_', 'NU_']
+        for sufix in sufixes:
+            for col in df.columns:
+                if col.startswith(sufix):
+                    new_col = col.replace(sufix, '')
+                    df.rename(columns={col: new_col}, inplace=True)
+        # Returns filtered df
+        return df[target_columns]
