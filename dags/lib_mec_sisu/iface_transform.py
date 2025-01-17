@@ -140,13 +140,12 @@ class Transform:
         for index, doc in enumerate(files):
             file = doc['filename']
             id_file = doc['_id']
-            year = doc['year']
             self.log.info(f'Processing {id_file}: {index+1}/{len(files)}')
 
             if not path.exists(file):
                 raise FileNotFoundError(f'Not found: {file}')
             
-            data = self.__transform(file, year)
+            data = self.__transform(file)
 
             if len(data) > 0:
                 self.log.info(f"Bulk insert to database: {self.config.vars.table} - {doc['year']}")
