@@ -20,8 +20,7 @@ class Variables:
     data_dir: str
     table: dict
     extension: str
-    cota_map: dict
-
+    target_columns: list
 
 class Config:
     """ Configuration interface """
@@ -42,7 +41,7 @@ class Config:
             data_dir=data.get("data_dir"),
             table=data.get("table"),
             extension=data.get('extension'),
-            cota_map=data.get('cota_map')
+            target_columns=data.get('target_columns')
         )
 
         self.db_connection = MongoHook(mongo_conn_id="mongo_default").get_conn()
