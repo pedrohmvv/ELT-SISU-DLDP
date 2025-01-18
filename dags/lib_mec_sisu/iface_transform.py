@@ -90,11 +90,11 @@ class Transform:
     def __get_columns(self, df):
         """Remove unwanted prefixes from column names and filter target columns."""
         sufixes = ['ST_', 'SG_', 'NU_', 'NO_', 'NOME_']
+        columns = df.columns
+        joined_columns = '|'.join(columns)
         for sufix in sufixes:
-            for col in df.columns:
-                if col.startswith(sufix):
-                    new_col = col.replace(sufix, '')
-                    df.rename(columns={col: new_col}, inplace=True)
+                joined_columns = joined_columns.replace(sufix, '')
+        df.columns = joined_columns.split('|')
         return df[self.config.vars.target_columns]
 
     def __transform(self, chunk: DataFrame) -> DataFrame:
