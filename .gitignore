@@ -23,3 +23,6 @@ tests
 data
 backup
 .env.secrets
+docker
+.gitlab-ci.yml
+.gitmodules

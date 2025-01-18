@@ -8,7 +8,6 @@ from model import DAGModel
 AIRFLOW_BASE = dirname(abspath(__file__))
 sys_path.append(AIRFLOW_BASE)
 
-
 # Build dag for local test
 globals()["dag-test"] = DAGModel().create_dag(
     dag_id="dag-test",
@@ -17,5 +16,5 @@ globals()["dag-test"] = DAGModel().create_dag(
     tags=["mec-sisu"],
     timeout=10,
     region="BR",
-    start_year=2021
+    start_year=2018
 )

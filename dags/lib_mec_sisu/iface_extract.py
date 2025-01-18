@@ -98,7 +98,7 @@ class Extract:
             
             self.log.info("Handle data")
             start_year = self.context['params']['start_year']
-            data = data.query('year==@start_year')
+            data = data.query('year>=@start_year')
 
             self.log.info("Searching for existing files")
             if len(data_registry) > 0:

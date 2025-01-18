@@ -92,108 +92,34 @@ class Transform:
 
         return data
 
-    def __sisu(self, data, year) -> DataFrame:
-        """Aggregate SISU data
-        return DataFrame
-        """
-        score_columns = [
-            'nota_l', 'nota_ch',
-            'nota_cn','nota_m', 
-            'nota_r'
-            ]
-
-        matricula_map = {
-            'PENDENTE':'P', 'NÃO COMPARECEU':'F', 'EFETIVADA':'E', 'CANCELADA':'C',
-            'DOCUMENTACAO REJEITADA':'R', 'NÃO CONVOCADO':'NC',
-            'SUBSTITUIDA - MATRICULA FORA DO PRAZO':'S', 'NÃO MATRICULADO':'NM'
-        }
-
-        cote_remap = {
-            'Indígena': 3,
-            'Preto': 5,
-            'Preto, Pardos, Indígenas e Quilombolas': 6,
-            'Ampla': 7,
-            'Ignorado': 9
-        }
-
-        rename = {}
-
-        if year == 2016: 
-            rename = {
-                'nome_curso':'curso','ds_modalidade':'mod_concorrencia',
-                'cod_ies':'co_ies'
-            }
-
-            if '1' in data['ds_etapa'].iloc[0].lower():
-                data['etapa'] = '4'
-            else:
-                data['etapa'] = '7'
-
-        if  2017 <= year <= 2021 :
-            data = data.rename(columns={'NO_MUNUCIPIO_CAMPUS':'municipio_campus'}) 
-
-        try:
-            data = data.drop(columns = ['DS_ETAPA'])
-        except KeyError:
-            data = data.drop(columns = ['ds_etapa'])
-
-        data = (
-            data.rename(columns = lambda x: x.lower())
-                .rename(
-                    columns = rename
-                )
-                .rename(
-                    columns = lambda x: x.replace('co_','')
-                                         .replace('nu_','')
-                                         .replace('st_','')
-                                         .replace('ds_','')
-                                         .replace('no_','')
-                                         .replace('sg_','')                                    
-            )
-        )
-
-        try:
-            data['matricula']
-        except KeyError:
-            data['matricula'] = None
-
-        data[score_columns] = data[score_columns].replace(',','.', regex=True).astype(float)
-        data['tipo_cota'] = data['mod_concorrencia'].map(self.config.vars.cota_map).replace(nan,'Outro')
-        data['tipo_cota'] = data['tipo_cota'].map(cote_remap).replace(nan,9)
-        data['matricula'] = data['matricula'].map(matricula_map)
-        data['etapa'] = data['etapa'].astype(str)
-
-        data = (
-            data.assign(
-                media = lambda x: (x.nota_l + x.nota_r + x.nota_cn + x.nota_m + x.nota_ch)/5,
-                aprovados = lambda x: x.aprovado.str.count('S'),
-                nao_aprovados = lambda x: x.aprovado.str.count('N'),
-                pendente = lambda x: x.matricula.str.count('P'),
-                nao_compareceu = lambda x: x.matricula.str.count('F'),
-                efetivada = lambda x: x.matricula.str.count('E'),
-                cancelada = lambda x: x.matricula.str.count('C'),
-                doc_rejeitada = lambda x: x.matricula.str.count('R'),
-                nao_convocado = lambda x: x.matricula.str.count('NC'),
-                nao_matriculado = lambda x: x.matricula.str.count('NM')
-            ).groupby(['ano','edicao','etapa','uf_ies','municipio_campus','tipo_cota'])
-            .agg({
-                'media':'mean','aprovados':'sum',
-                'nao_aprovados':'sum','pendente':'sum','nao_compareceu':'sum',
-                'efetivada':'sum', 'cancelada':'sum','doc_rejeitada':'sum',
-                'nao_convocado':'sum'
-            })
-            ).reset_index()
-
-        return data
+    def __get_columns(self, df):
+            # Sufixes to remove
+            sufixes = ['ST_', 'SG_', 'NU_', 'NO_', 'NOME_']
+            for sufix in sufixes:
+                for col in df.columns:
+                    if col.startswith(sufix):
+                        new_col = col.replace(sufix, '')
+                        df.rename(columns={col: new_col}, inplace=True)
+            # Returns filtered df
+            return df[self.config.vars.target_columns]
     
-    def __transform(self, file, year) -> DataFrame:
+    def __transform(self, file) -> DataFrame:
         """Transform Sisu information
         returns DataFrame
         """
         try:
             self.__file = file
-            data = self.__read_file()
-            data = self.__sisu(data, year)
+            # Read file
+            raw_data = self.__read_file()
+            # Filter data columns
+            filtered_data = self.__get_columns(raw_data)
+            # Filter target data
+            data = filtered_data.loc[
+                    (filtered_data['MATRICULA'] == 'EFETIVADA') &
+                    (filtered_data['SIGLA_IES'] == 'UFPB') &
+                    (filtered_data['UF_IES'] == 'PB')
+                ]
+
             return data
         
         except Exception as error:
@@ -209,13 +135,12 @@ class Transform:
         for index, doc in enumerate(files):
             file = doc['filename']
             id_file = doc['_id']
-            year = doc['year']
             self.log.info(f'Processing {id_file}: {index+1}/{len(files)}')
 
             if not path.exists(file):
                 raise FileNotFoundError(f'Not found: {file}')
             
-            data = self.__transform(file, year)
+            data = self.__transform(file)
 
             if len(data) > 0:
                 self.log.info(f"Bulk insert to database: {self.config.vars.table} - {doc['year']}")
@@ -240,4 +165,3 @@ class Transform:
         rmtree(self.data_dir)
         
         return 'Successfuly processed'
-
