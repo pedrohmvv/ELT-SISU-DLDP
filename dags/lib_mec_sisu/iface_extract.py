@@ -38,27 +38,25 @@ class Extract:
         return DataFrame
         """
         try:
-
             key = self.config.vars.table
 
             data_registry = DataFrame(
                 self.config.registry.find(
-                    {"table": key},
-                    {"filename": True, "_id": False})
-            ).rename(columns={"filename": "_id"})
+                                {"table": key},
+                                {"filename": True, "_id": False})
+                                ).rename(columns={"filename": "_id"})
 
             start = 0
             download_links = []
-
             self.log.info('Read data')
             while True:
                 data_page = get(self.config.vars.data_url+str(start))
                 data_page_soup = BeautifulSoup(data_page.content, 'html.parser')
                 data_pages_url = [self.config.vars.domain+title.a['href'] for title in data_page_soup.find_all('h2', class_='tileHeadline')]
-
+                # If there ins't any data left, break the loop
                 if len(data_pages_url) == 0:
                     break
-                
+                # For url in data_pages_url, connects to the page and get the download link
                 for page in data_pages_url:
                     link_page_soup = get(page)
                     content = BeautifulSoup(link_page_soup.content, 'html.parser')
@@ -99,7 +97,6 @@ class Extract:
             self.log.info("Handle data")
             start_year = self.context['params']['start_year']
             data = data.query('year>=@start_year')
-
             self.log.info("Searching for existing files")
             if len(data_registry) > 0:
                 data = data.merge(

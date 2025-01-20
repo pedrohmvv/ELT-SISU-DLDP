@@ -35,18 +35,18 @@ class Transform:
         """
         self.log.info("Checking files")
         filters = {"table": self.config.vars.table, "processed": None}
-
+        # Define projection
         projects = {"_id": True, 'filename': True, 'year': True}
-
+        # Get files to be processed
         files = list(
             self.config.registry.aggregate(
                 [{"$match": filters}, {"$project": projects}]
             )
         )
-
+        # Check if there are files to be processed
         if len(files) == 0:
             self.log.info("No new files to be processed")
-
+        # Check if files exist
         processed_files = []
         for elem in files:
             year = elem['year']
@@ -92,6 +92,7 @@ class Transform:
         sufixes = ['ST_', 'SG_', 'NU_', 'NO_', 'NOME_']
         columns = df.columns
         joined_columns = '|'.join(columns)
+        # Remove unwanted prefixes
         for sufix in sufixes:
                 joined_columns = joined_columns.replace(sufix, '')
         df.columns = joined_columns.split('|')
@@ -116,7 +117,6 @@ class Transform:
     def execute(self) -> str:
         """ Transform and insert dataset incrementally with chunks """
         files = self.__check_files()
-
         for index, doc in enumerate(files):
             file = doc['filename']
             id_file = doc['_id']
@@ -124,19 +124,22 @@ class Transform:
 
             if not path.exists(file):
                 raise FileNotFoundError(f'Not found: {file}')
-
-            total_rows = 0  # Keep track of total rows processed
+            # Keep track of total rows processed
+            total_rows = 0  
             total_columns = 0
-
-            for chunk in self.__read_file(file):  # Process each chunk
-                processed_data = self.__transform(chunk)
+            # Process each chunk
+            for chunk in self.__read_file(file):
+                try:
+                    processed_data = self.__transform(chunk)
+                except KeyError as error:
+                    self.log.error(f"Error processing chunk: {error}, MATRICULA columns doesn't exist.")
+                    continue
                 # Insert
                 if not processed_data.empty:
                     self.log.info(f"Bulk inserting {len(processed_data)} rows to database.")
                     self.config.db_conntable[self.config.vars.table].insert_many(processed_data.to_dict('records'))
                     total_rows += len(processed_data)
                     total_columns = processed_data.shape[1]
-
             # Update metadata for the file
             self.log.info("Updating registry metadata")
             self.config.registry.update_one(
@@ -149,7 +152,6 @@ class Transform:
                      'processing_date': datetime.now()}
                  }
             )
-
         # Clean up the data directory
         rmtree(self.data_dir)
 
