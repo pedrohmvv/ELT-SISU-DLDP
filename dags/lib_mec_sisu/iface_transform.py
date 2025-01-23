@@ -93,7 +93,7 @@ class Transform:
         columns = df.columns
         joined_columns = '|'.join(columns)
         for sufix in sufixes:
-                joined_columns = joined_columns.replace(sufix, '')
+            joined_columns = joined_columns.replace(sufix, '')
         df.columns = joined_columns.split('|')
         return df[self.config.vars.target_columns]
 
