@@ -8,11 +8,6 @@ Esta DAG executa as seguinte pipeline de dados:
 
 ### Outputs
 
-Esta pipeline popula as seguintes tabela no banco de dados:
+Esta pipeline popula a seguinte tabela no banco de dados:
 
--
-
-### Contato
-
-Em caso de dúvidas ou sugestões, entrar em contato
-[contato@lema.ufpb.br](mailto:contato@lema.ufpb.br).
+- sisu
